@@ -106,7 +106,10 @@ func (m *NPM) GetRootModule(path string) (*meta.Package, error) {
 		mod.Name = pkResult["name"].(string)
 	}
 	if pkResult["author"] != nil {
-		mod.Supplier.Name = pkResult["author"].(string)
+		mod.Supplier = meta.Supplier{
+			Type: meta.Organization,
+			Name: pkResult["author"].(string),
+		}
 	}
 	if pkResult["version"] != nil {
 		mod.Version = pkResult["version"].(string)
@@ -227,7 +230,10 @@ func (m *NPM) buildDependencies(path string, deps map[string]interface{}) ([]met
 				r := "https://www.npmjs.com/package/%s/v/%s"
 				mod.PackageDownloadLocation = fmt.Sprintf(r, mod.Name, mod.Version)
 			}
-			mod.Supplier.Name = mod.Name
+			mod.Supplier = meta.Supplier{
+				Type: meta.Organization,
+				Name: mod.Name,
+			}
 
 			mod.PackageURL = getPackageHomepage(filepath.Join(path, m.metadata.ModulePath[0], key, m.metadata.Manifest[0]))
 			h := fmt.Sprintf("%x", sha256.Sum256([]byte(mod.Name)))
