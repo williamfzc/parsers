@@ -207,6 +207,9 @@ func (m *NPM) buildDependencies(path string, deps map[string]interface{}) ([]met
 	}
 	rootDeps := getPackageDependencies(deps, "dependencies")
 	for k, v := range rootDeps {
+		if k == "" {
+			continue
+		}
 		de.Packages[k] = v
 	}
 	modules = append(modules, *de)
@@ -214,12 +217,18 @@ func (m *NPM) buildDependencies(path string, deps map[string]interface{}) ([]met
 	allDeps := appendNestedDependencies(deps)
 	for key, dd := range allDeps {
 		depName := strings.TrimPrefix(key, "@")
+		if key == "" {
+			continue
+		}
 		for nkey := range dd {
 			var mod meta.Package
 			d := dd[nkey].(map[string]interface{})
 			mod.Version = strings.TrimSpace(strings.TrimPrefix(strings.TrimPrefix(strings.TrimPrefix(strings.TrimPrefix(nkey, "^"), "~"), ">"), "="))
 			mod.Version = strings.Split(mod.Version, " ")[0]
 			mod.Name = depName
+			if depName == "" {
+				continue
+			}
 
 			r := ""
 			if d["resolved"] != nil {
